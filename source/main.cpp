@@ -1,7 +1,7 @@
 #include <array>
 #include <complex>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 using namespace std;
 bool fuzz_me(const uint8_t *data, size_t data_size) {
   return (((3 <= data_size) && (('F' == data[0]) && ('U' == data[1]))) &&
@@ -13,10 +13,14 @@ void rasterize_triangle(complex<float> a, complex<float> b, complex<float> c,
   {
     float image_max_x(image.size());
     float image_max_y(image[0].size());
-    auto min_x(min((0.0e+0f), min(min(real(a), real(b)), real(c))));
-    auto min_y(min((0.0e+0f), min(min(imag(a), imag(b)), imag(c))));
-    auto max_x(max(image_max_x, max(max(real(a), real(b)), real(c))));
-    auto max_y(max(image_max_y, max(max(imag(a), imag(b)), imag(c))));
+    uint32_t min_x(static_cast<uint32_t>(
+        min((0.0e+0f), min(min(real(a), real(b)), real(c)))));
+    uint32_t min_y(static_cast<uint32_t>(
+        min((0.0e+0f), min(min(imag(a), imag(b)), imag(c)))));
+    uint32_t max_x(static_cast<uint32_t>(
+        max(image_max_x, max(max(real(a), real(b)), real(c)))));
+    uint32_t max_y(static_cast<uint32_t>(
+        max(image_max_y, max(max(imag(a), imag(b)), imag(c)))));
     {
       auto v0((b - a));
       auto v1((c - a));

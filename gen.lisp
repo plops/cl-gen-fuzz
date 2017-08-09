@@ -50,8 +50,8 @@ is replaced with replacement."
 (let ((code `(with-compilation-unit
 	
 		 (include <array>)
-	       (include <stdint.h>)
-	       (include <stddef.h>)
+	       (include <cstdint>)
+	       (include <cstddef>)
 	       (include <complex>)
 	       
 	       (raw "using namespace std;")
@@ -88,17 +88,19 @@ is replaced with replacement."
 				     appending
 				       (loop for coord in '(x y) and fun in '(real imag) collect
 					    `(,(format nil "~a_~a" typ coord)
-					       :ctor (funcall ,typ
-							      ,(case typ
-								 (min `0s0)
-								 (max (format nil "image_max_~a" coord) ))
+					       :type uint32_t
+					       :ctor (funcall static_cast<uint32_t>
 							      (funcall ,typ
+							       ,(case typ
+								      (min `0s0)
+								      (max (format nil "image_max_~a" coord) ))
 							       (funcall ,typ
-									(funcall ,fun a)
-									(funcall ,fun b))
-							       (funcall ,fun c)
-							       )
-							      )))))
+									(funcall ,typ
+										 (funcall ,fun a)
+										 (funcall ,fun b))
+									(funcall ,fun c)
+									)
+							       ))))))
 			   
 			   (let ((v0 :ctor (- b a))
 				 (v1 :ctor (- c a))
