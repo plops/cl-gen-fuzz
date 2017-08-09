@@ -82,25 +82,42 @@ is replaced with replacement."
 						       )
 						(image :type "array<array<float,100>,200>&"))
 					     void)
-			 (let ((image_max_x :type float :ctor (funcall image.size))
-			       (image_max_y :type float :ctor (funcall "image[0].size"))
+			 (let ((image_max_x :type "const uint32_t" :ctor (funcall image.size))
+			       (image_max_y :type "const uint32_t" :ctor (funcall "image[0].size"))
+			       
+			       (bottom :ctor (lambda (((x :type float)
+						       (y :type float)
+						       (z :type float))
+						      :ret "->uint32_t")
+					       (return
+						 (funcall static_cast<uint32_t>
+							  (funcall floor
+							   (funcall min (funcall min x y) z))))))
+			       (ceiling :ctor (lambda (((x :type float)
+							(y :type float)
+							(z :type float))
+						      :ret "->uint32_t")
+					       (return
+						 (funcall static_cast<uint32_t>
+							  (funcall ceil
+								   (funcall max (funcall max x y) z))))))
 			       ,@ (loop for typ in '(min max)
 				     appending
 				       (loop for coord in '(x y) and fun in '(real imag) collect
 					    `(,(format nil "~a_~a" typ coord)
 					       :type uint32_t
-					       :ctor (funcall static_cast<uint32_t>
-							      (funcall ,typ
-							       ,(case typ
-								      (min `0s0)
-								      (max (format nil "image_max_~a" coord) ))
-							       (funcall ,typ
-									(funcall ,typ
-										 (funcall ,fun a)
-										 (funcall ,fun b))
-									(funcall ,fun c)
-									)
-							       ))))))
+					       :ctor (funcall ,typ
+
+							      ,(case typ
+								     (min `0u)
+								     (max (format nil "image_max_~a" coord) ))
+							      (funcall ,(case typ
+									      (min `bottom)
+									      (max `ceiling))
+
+								       (funcall ,fun a)
+								       (funcall ,fun b)
+								       (funcall ,fun c)))))))
 			   
 			   (let ((v0 :ctor (- b a))
 				 (v1 :ctor (- c a))

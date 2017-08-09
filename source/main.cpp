@@ -11,16 +11,18 @@ void rasterize_triangle(complex<float> a, complex<float> b, complex<float> c,
                         float f0, float f1, float f2,
                         array<array<float, 100>, 200> &image) {
   {
-    float image_max_x(image.size());
-    float image_max_y(image[0].size());
-    uint32_t min_x(static_cast<uint32_t>(
-        min((0.0e+0f), min(min(real(a), real(b)), real(c)))));
-    uint32_t min_y(static_cast<uint32_t>(
-        min((0.0e+0f), min(min(imag(a), imag(b)), imag(c)))));
-    uint32_t max_x(static_cast<uint32_t>(
-        max(image_max_x, max(max(real(a), real(b)), real(c)))));
-    uint32_t max_y(static_cast<uint32_t>(
-        max(image_max_y, max(max(imag(a), imag(b)), imag(c)))));
+    const uint32_t image_max_x(image.size());
+    const uint32_t image_max_y(image[0].size());
+    auto bottom([](float x, float y, float z) -> uint32_t {
+      return static_cast<uint32_t>(floor(min(min(x, y), z)));
+    });
+    auto ceiling([](float x, float y, float z) -> uint32_t {
+      return static_cast<uint32_t>(ceil(max(max(x, y), z)));
+    });
+    uint32_t min_x(min(0u, bottom(real(a), real(b), real(c))));
+    uint32_t min_y(min(0u, bottom(imag(a), imag(b), imag(c))));
+    uint32_t max_x(max(image_max_x, ceiling(real(a), real(b), real(c))));
+    uint32_t max_y(max(image_max_y, ceiling(imag(a), imag(b), imag(c))));
     {
       auto v0((b - a));
       auto v1((c - a));
