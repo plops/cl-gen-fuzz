@@ -9,5 +9,5 @@ set(SOURCE_FILES
         main.cpp)
 
 add_executable(source ${SOURCE_FILES})
-target_link_libraries(source /usr/lib/llvm-5.0/lib/libFuzzer.a)
+#xtarget_link_libraries(source /usr/lib/llvm-5.0/lib/libFuzzer.a)
 target_link_libraries(source pthread)

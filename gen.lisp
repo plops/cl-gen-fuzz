@@ -71,6 +71,18 @@ is replaced with replacement."
 					     (== (char #\U) (aref data 1))))
 				     (&& (== (char #\Z) (aref data 2))
 					 (== (char #\Z) (aref data 3))))))
+	       ;;https://en.wikipedia.org/wiki/Test_functions_for_optimization
+	       (function (goldstein_price ((z :type "complex<float>")) float)
+			 (let ((x :ctor (funcall real z))
+			       (y :ctor (funcall imag z))
+			       (xy1 :ctor (+ x y 1))
+			       (x2 :ctor (* x x))
+			       (y2 :ctor (* y y))
+			       (xy3 :ctor (- (* 2 x)
+					     (* 3 y))))
+			   (return
+			    (* (+ 1 (* xy1 xy1 (+ 19 (* -14 x) (* 3 x2) (* -14 y) (* 6 x y) (* 3 y2))))
+			       (+ 30 (* xy3 xy3) (+ 18 (* -32 x) (* 12 x2) (* 48 y) (* -36 x y) (* 27 y2)))))))
 	       ;; http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 	       ;; https://gamedev.stackexchange.com/questions/23743/whats-the-most-efficient-way-to-find-barycentric-coordinates
 	       ;; https://classes.soe.ucsc.edu/cmps160/Fall10/resources/barycentricInterpolation.pdf
@@ -110,7 +122,7 @@ is replaced with replacement."
 
 							      ,(case typ
 								     (min `0u)
-								     (max (format nil "image_max_~a" coord) ))
+								     (max `(- ,(format nil "image_max_~a" coord) 1) ))
 							      (funcall ,(case typ
 									      (min `bottom)
 									      (max `ceiling))
@@ -153,14 +165,25 @@ is replaced with replacement."
 					 (setf (aref image y x)
 					       (+ (* u f0)
 						  (* v f1)
-						  (* w f2)))
-					 ))))))
+						  (* w f2)))))))))
+	       (function (main () int)
+			 (let ((w :type "const int" :ctor 100)
+			       (h :type "const int" :ctor 200)
+			       (im{} :type "array<array<float,w>,h>"))
+			   (dotimes (j h)
+			     (dotimes (i w)
+			       (let ((x :ctor (* 3s0 (- (/ i (* 1s0 w)) .5)))
+				     (y :ctor (* 3s0 (- (/ j (* 1s0 h)) .5))))
+				(setf (aref im i j) (funcall goldstein_price (raw "complex<float>{x,y}")))))))
+			 (return 0))
+	       #+nil
 	       (function (lerp ((v0 :type float)
 				(v1 :type float)
 				(x :type float))
 			       float)
 			 (return (+ (* (- 1 x) v0)
 				    (* x v1))))
+	       #+nil
 	       (function (fuzz_me2 ((data :type "const uint8_t*")
 				    (data_size :type "size_t"))
 				   bool)
@@ -169,6 +192,7 @@ is replaced with replacement."
 					     (== (char #\U) (aref data 1))))
 				     (&& (== (char #\Z) (aref data 2))
 					 (== (char #\Z) (aref data 3))))))
+	       #+nil
 	       (extern-c
 		(function  (LLVMFuzzerTestOneInput ((data :type "const uint8_t*")
 						    (size :type size_t))
